@@ -80,7 +80,7 @@ class Type implements PropertyConstraint
         }
 
         return new ValidationError(
-            'Value {value} is not a(n) {type}',
+            'O valor informado "{value}" não é do tipo {type}',
             self::KEYWORD,
             $value,
             $pointer,
