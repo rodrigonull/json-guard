@@ -26,7 +26,7 @@ class Required implements PropertyConstraint
 
         if (count($missing)) {
             $errors = [];
-            
+
             foreach ($missing as $attr) {
                 $errors[] = new ValidationError(
                     'O valor para o campo: {attr} não foi informado',
