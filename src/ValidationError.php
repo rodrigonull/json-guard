@@ -56,6 +56,16 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
     }
 
     /**
+     * Get the original message for this error
+     *
+     * @return string
+     */
+    public function getOriginalMessage()
+    {
+        return $this->message;
+    }
+
+    /**
      * Interpolate the context values into the message placeholders.
      *
      * @param  string $message

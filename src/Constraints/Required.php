@@ -29,7 +29,7 @@ class Required implements PropertyConstraint
 
             foreach ($missing as $attr) {
                 $errors[] = new ValidationError(
-                    'O valor para o campo: {attr} não foi informado',
+                    'O valor para o campo {attr} não foi informado.',
                     self::KEYWORD,
                     $data,
                     $pointer,
