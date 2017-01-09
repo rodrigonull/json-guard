@@ -23,14 +23,21 @@ class Required implements PropertyConstraint
 
         $actualProperties = array_keys(get_object_vars($data));
         $missing          = array_diff($parameter, $actualProperties);
+
         if (count($missing)) {
-            return new ValidationError(
-                'As seguintes propriedades estão faltando: {missing}',
-                self::KEYWORD,
-                $data,
-                $pointer,
-                ['missing' => array_values($missing)]
-            );
+            $errors = [];
+            
+            foreach ($missing as $attr) {
+                $errors[] = new ValidationError(
+                    'O valor para o campo: {attr} não foi informado',
+                    self::KEYWORD,
+                    $data,
+                    $pointer,
+                    ['attr' => $attr]
+                );
+            }
+
+            return $errors;
         }
 
         return null;
