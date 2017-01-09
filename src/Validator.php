@@ -74,7 +74,7 @@ class Validator implements SubSchemaValidatorFactory
      */
     public function __construct($data, $schema, RuleSet $ruleSet = null)
     {
-        if (!is_object($schema)) {
+        if (! is_object($schema)) {
             throw new \InvalidArgumentException(
                 sprintf('The schema should be an object from a json_decode call, got "%s"', gettype($schema))
             );
@@ -85,11 +85,8 @@ class Validator implements SubSchemaValidatorFactory
             $schema = $schema->resolve();
         }
 
-        $this->data    = $data;
-        $this->schema  = $schema;
-
-        var_dump($this->schema);
-        exit;
+        $this->data = $data;
+        $this->schema = $schema;
 
         $this->ruleSet = $ruleSet ?: new DraftFour();
     }
@@ -99,7 +96,7 @@ class Validator implements SubSchemaValidatorFactory
      */
     public function fails()
     {
-        return !$this->passes();
+        return ! $this->passes();
     }
 
     /**
@@ -123,62 +120,6 @@ class Validator implements SubSchemaValidatorFactory
     }
 
     /**
-     * Set the maximum allowed depth data will be validated until.
-     * If the data exceeds the stack depth an exception is thrown.
-     *
-     * @param int $maxDepth
-     *
-     * @return $this
-     */
-    public function setMaxDepth($maxDepth)
-    {
-        $this->maxDepth = $maxDepth;
-
-        return $this;
-    }
-
-    /**
-     * Register a custom format validation extension.
-     *
-     * @param string          $format
-     * @param FormatExtension $extension
-     */
-    public function registerFormatExtension($format, FormatExtension $extension)
-    {
-        $this->formatExtensions[$format] = $extension;
-    }
-
-    /**
-     * @internal
-     * @return string
-     */
-    public function getPointer()
-    {
-        return $this->pointer;
-    }
-
-    /**
-     * Create a new sub-validator.
-     *
-     * @param mixed  $data
-     * @param object $schema
-     * @param string $pointer
-     *
-     * @return Validator
-     */
-    public function makeSubSchemaValidator($data, $schema, $pointer)
-    {
-        $validator = new Validator($data, $schema, $this->ruleSet);
-
-        $validator->pointer          = $pointer;
-        $validator->maxDepth         = $this->maxDepth;
-        $validator->formatExtensions = $this->formatExtensions;
-        $validator->depth            = $this->depth + 1;
-
-        return $validator;
-    }
-
-    /**
      * Validate the data and collect the errors.
      */
     private function validate()
@@ -191,6 +132,8 @@ class Validator implements SubSchemaValidatorFactory
 
         foreach ($this->schema as $rule => $parameter) {
             $errors = (array) $this->validateRule($rule, $parameter);
+
+            $this->property = $parameter;
 
             if (is_array($errors)) {
                 foreach ($errors as $error) {
@@ -227,7 +170,7 @@ class Validator implements SubSchemaValidatorFactory
      */
     private function validateRule($rule, $parameter)
     {
-        if (!$this->ruleSet->has($rule)) {
+        if (! $this->ruleSet->has($rule)) {
             return null;
         }
 
@@ -238,6 +181,45 @@ class Validator implements SubSchemaValidatorFactory
         $constraint = $this->ruleSet->getConstraint($rule);
 
         return $this->invokeConstraint($constraint, $parameter);
+    }
+
+    /**
+     * Determine if a rule has a custom format extension registered.
+     *
+     * @param string $rule
+     * @param mixed  $parameter
+     *
+     * @return bool
+     */
+    private function isCustomFormatExtension($rule, $parameter)
+    {
+        return $rule === 'format' &&
+               is_string($parameter) &&
+               isset($this->formatExtensions[$parameter]);
+    }
+
+    /**
+     * Call a custom format extension to validate the data.
+     *
+     * @param string $format
+     *
+     * @return ValidationError|null
+     */
+    private function validateCustomFormat($format)
+    {
+        /** @var FormatExtension $extension */
+        $extension = $this->formatExtensions[$format];
+
+        return $extension->validate($this->data, $this->getPointer());
+    }
+
+    /**
+     * @internal
+     * @return string
+     */
+    public function getPointer()
+    {
+        return $this->pointer;
     }
 
     /**
@@ -264,36 +246,6 @@ class Validator implements SubSchemaValidatorFactory
     }
 
     /**
-     * Determine if a rule has a custom format extension registered.
-     *
-     * @param string $rule
-     * @param mixed  $parameter
-     *
-     * @return bool
-     */
-    private function isCustomFormatExtension($rule, $parameter)
-    {
-        return $rule === 'format' &&
-            is_string($parameter) &&
-            isset($this->formatExtensions[$parameter]);
-    }
-
-    /**
-     * Call a custom format extension to validate the data.
-     *
-     * @param string $format
-     *
-     * @return ValidationError|null
-     */
-    private function validateCustomFormat($format)
-    {
-        /** @var FormatExtension $extension */
-        $extension = $this->formatExtensions[$format];
-
-        return $extension->validate($this->data, $this->getPointer());
-    }
-
-    /**
      * Merge the errors with our error collection.
      *
      * @param ValidationError[]|ValidationError|null $errors
@@ -311,5 +263,57 @@ class Validator implements SubSchemaValidatorFactory
         }
 
         $this->errors[] = $errors;
+    }
+
+    /**
+     * Set the maximum allowed depth data will be validated until.
+     * If the data exceeds the stack depth an exception is thrown.
+     *
+     * @param int $maxDepth
+     *
+     * @return $this
+     */
+    public function setMaxDepth($maxDepth)
+    {
+        $this->maxDepth = $maxDepth;
+
+        return $this;
+    }
+
+    /**
+     * Register a custom format validation extension.
+     *
+     * @param string          $format
+     * @param FormatExtension $extension
+     */
+    public function registerFormatExtension($format, FormatExtension $extension)
+    {
+        $this->formatExtensions[$format] = $extension;
+    }
+
+    /**
+     * Create a new sub-validator.
+     *
+     * @param mixed  $data
+     * @param object $schema
+     * @param string $pointer
+     *
+     * @return Validator
+     */
+    public function makeSubSchemaValidator($data, $schema, $pointer)
+    {
+        $validator = new Validator($data, $schema, $this->ruleSet);
+
+        $validator->pointer = $pointer;
+        $validator->maxDepth = $this->maxDepth;
+        $validator->formatExtensions = $this->formatExtensions;
+        $validator->depth = $this->depth + 1;
+
+        return $validator;
+    }
+
+    public function getProperty()
+    {
+        return $this->property;
     }
 }
