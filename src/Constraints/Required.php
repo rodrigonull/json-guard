@@ -32,7 +32,7 @@ class Required implements PropertyConstraint
                     'O valor para o campo {attr} não foi informado.',
                     self::KEYWORD,
                     $data,
-                    $attr,
+                    $pointer,
                     ['attr' => $attr]
                 );
             }

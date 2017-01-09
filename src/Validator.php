@@ -33,6 +33,11 @@ class Validator implements SubSchemaValidatorFactory
     private $pointer = '';
 
     /**
+     * @var string
+     */
+    private $property = '';
+
+    /**
      * The maximum depth the validator should recurse into $data
      * before throwing an exception.
      *
@@ -82,6 +87,10 @@ class Validator implements SubSchemaValidatorFactory
 
         $this->data    = $data;
         $this->schema  = $schema;
+
+        var_dump($this->schema);
+        exit;
+
         $this->ruleSet = $ruleSet ?: new DraftFour();
     }
 
