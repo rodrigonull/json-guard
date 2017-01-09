@@ -40,7 +40,7 @@ class Min implements ParentSchemaAwarePropertyConstraint
         }
 
         return new ValidationError(
-            'Number {value} is not at least {min}',
+            'O número {value} deve ser no minimo {min}',
             self::KEYWORD,
             $value,
             $pointer,
@@ -62,7 +62,7 @@ class Min implements ParentSchemaAwarePropertyConstraint
         }
 
         return new ValidationError(
-            'Number {value} is not at least greater than {exclusive_min}',
+            'O número {value} deve ser pelo menos maior que {exclusive_min}',
             self::EXCLUSIVE_KEYWORD,
             $value,
             $pointer,

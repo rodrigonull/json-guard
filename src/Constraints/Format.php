@@ -89,7 +89,7 @@ class Format implements PropertyConstraint
         }
 
         return new ValidationError(
-            'Value {value} does not match the format {format}',
+            'O valor {value} deve estar no formato {format}',
             self::KEYWORD,
             $value,
             $pointer,
@@ -121,7 +121,7 @@ class Format implements PropertyConstraint
         }
 
         return new ValidationError(
-            'Value {value} does not match the format {format}',
+            'O valor {value} não está no formato {format}',
             self::KEYWORD,
             $value,
             $pointer,
