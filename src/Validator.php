@@ -312,6 +312,11 @@ class Validator implements SubSchemaValidatorFactory
         return $validator;
     }
 
+    /**
+     * Retorna a propriedade
+     *
+     * @return string
+     */
     public function getProperty()
     {
         return $this->property;
