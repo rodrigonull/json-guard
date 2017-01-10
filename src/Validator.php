@@ -33,11 +33,6 @@ class Validator implements SubSchemaValidatorFactory
     private $pointer = '';
 
     /**
-     * @var string
-     */
-    private $property = '';
-
-    /**
      * The maximum depth the validator should recurse into $data
      * before throwing an exception.
      *
@@ -133,10 +128,9 @@ class Validator implements SubSchemaValidatorFactory
         foreach ($this->schema as $rule => $parameter) {
             $errors = (array) $this->validateRule($rule, $parameter);
 
-            $this->property = $parameter;
-
             if (is_array($errors)) {
                 foreach ($errors as $error) {
+                    $error->setProperty($parameter);
                     $this->mergeErrors($error);
                 }
             }
@@ -310,15 +304,5 @@ class Validator implements SubSchemaValidatorFactory
         $validator->depth = $this->depth + 1;
 
         return $validator;
-    }
-
-    /**
-     * Retorna a propriedade
-     *
-     * @return string
-     */
-    public function getProperty()
-    {
-        return $this->property;
     }
 }

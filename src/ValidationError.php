@@ -30,6 +30,11 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
     private $context;
 
     /**
+     * @var string
+     */
+    private $property = '';
+
+    /**
      * @param string      $message
      * @param string      $keyword
      * @param mixed       $value
@@ -41,18 +46,8 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
         $this->message = $message;
         $this->keyword = $keyword;
         $this->pointer = $pointer;
-        $this->value   = $value;
+        $this->value = $value;
         $this->context = array_map('League\JsonGuard\as_string', $context);
-    }
-
-    /**
-     * Get the human readable error message for this error.
-     *
-     * @return string
-     */
-    public function getMessage()
-    {
-        return $this->interpolate($this->message, $this->context);
     }
 
     /**
@@ -63,6 +58,53 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
     public function getOriginalMessage()
     {
         return $this->message;
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     *
+     * @link  http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     *        which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'keyword' => $this->getKeyword(),
+            'message' => $this->getMessage(),
+            'pointer' => $this->getPointer(),
+            'value'   => $this->getValue(),
+            'context' => $this->getContext(),
+        ];
+    }
+
+    /**
+     * Get the schema keyword for this error.
+     *
+     * @return string
+     */
+    public function getKeyword()
+    {
+        return $this->keyword;
+    }
+
+    /**
+     * Get the human readable error message for this error.
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->interpolate($this->message, $this->context);
     }
 
     /**
@@ -81,16 +123,6 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
         }
 
         return strtr($message, $replace);
-    }
-
-    /**
-     * Get the schema keyword for this error.
-     *
-     * @return string
-     */
-    public function getKeyword()
-    {
-        return $this->keyword;
     }
 
     /**
@@ -124,33 +156,8 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * @return array
-     */
-    public function toArray()
-    {
-        return [
-            'keyword' => $this->getKeyword(),
-            'message' => $this->getMessage(),
-            'pointer' => $this->getPointer(),
-            'value'   => $this->getValue(),
-            'context' => $this->getContext(),
-        ];
-    }
-
-    /**
-     * Specify data which should be serialized to JSON
-     * @link  http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed data which can be serialized by <b>json_encode</b>,
-     * which is a value of any type other than a resource.
-     * @since 5.4.0
-     */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
-    }
-
-    /**
      * Whether a offset exists
+     *
      * @link  http://php.net/manual/en/arrayaccess.offsetexists.php
      *
      * @param mixed $offset <p>
@@ -170,6 +177,7 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
 
     /**
      * Offset to retrieve
+     *
      * @link  http://php.net/manual/en/arrayaccess.offsetget.php
      *
      * @param mixed $offset <p>
@@ -182,11 +190,13 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
     public function offsetGet($offset)
     {
         $errorArray = $this->toArray();
+
         return array_key_exists($offset, $errorArray) ? $errorArray[$offset] : null;
     }
 
     /**
      * Offset to set
+     *
      * @link  http://php.net/manual/en/arrayaccess.offsetset.php
      *
      * @param mixed $offset <p>
@@ -207,6 +217,7 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
 
     /**
      * Offset to unset
+     *
      * @link  http://php.net/manual/en/arrayaccess.offsetunset.php
      *
      * @param mixed $offset <p>
@@ -220,5 +231,25 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
     {
         // A ValidationError is immutable.
         return null;
+    }
+
+    /**
+     * Retorna a propriedade
+     *
+     * @return string
+     */
+    public function getProperty()
+    {
+        return $this->property;
+    }
+
+    /**
+     * Seta a o propriedade
+     *
+     * @param string $property
+     */
+    public function setProperty($property)
+    {
+        $this->property = $property;
     }
 }
