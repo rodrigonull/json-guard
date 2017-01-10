@@ -130,7 +130,6 @@ class Validator implements SubSchemaValidatorFactory
 
             if (is_array($errors)) {
                 foreach ($errors as $error) {
-                    $error->setProperty($parameter);
                     $this->mergeErrors($error);
                 }
             }

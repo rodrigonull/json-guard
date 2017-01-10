@@ -43,6 +43,9 @@ class ValidationError implements \ArrayAccess, \JsonSerializable
      */
     public function __construct($message, $keyword, $value, $pointer = null, array $context = [])
     {
+        var_dump(func_get_args());
+        exit;
+
         $this->message = $message;
         $this->keyword = $keyword;
         $this->pointer = $pointer;
